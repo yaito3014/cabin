@@ -9,7 +9,7 @@
 cmake-out/
 
 # Make
-build-out/
+build/
 
 # Poac
 poac-out/

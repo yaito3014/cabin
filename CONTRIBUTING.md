@@ -1,6 +1,6 @@
 # Contributing
 
-Given our limited resources, we do not review PRs that fail to adhere to this document.
+Given our limited resources, we may not review PRs that fail to adhere to this document.
 
 Note that we have a [code of conduct](https://github.com/poac-dev/.github/blob/main/CODE_OF_CONDUCT.md),
 follow it in all your interactions with the project.
@@ -109,23 +109,22 @@ mkdocs build --strict
 We generally follow the
 [Git Contribution Guidelines](https://git-scm.com/docs/SubmittingPatches#describe-changes).
 
-- **First Line**: Ensure the first line of your commit message adheres to the
-  guidelines for a concise and clear summary.
-- **Body**: While not mandatory, it is recommended to follow the rest of the
-  guidelines to maintain consistency and provide helpful context for future
-  readers.
+- **First Line**: `component: description of the patch` in all lowercase.
+- **Body**: Explain your change in 2-3 paragraphs:
+  1. the current problem you want to solve
+  2. justification of your change
+  3. if any, alternative solutions considered but discarded
+
+Read [Git Contribution Guidelines](https://git-scm.com/docs/SubmittingPatches#describe-changes)
+for more examples.
 
 ## Pull Request Style
 
-When creating a PR:
-
-1. **CI**: Verify that all CI checks pass on your fork before submitting the
+1. **Title**: Follow the First Line rule of [Commit Message](#commit-message).
+2. **Description**: Follow the Body rule of [Commit Message](#commit-message).
+3. **CI**: Verify that all CI checks pass on your fork before submitting the
    PR.  Avoid relying on the CI of this repository to catch errors, as this
    can cause delays or stalls for other contributors.
-2. **Commit Structure**: There is no need to squash commits within the PR
+4. **Commits**: There is no need to squash commits within the PR
    unless explicitly requested.  Keeping separate commits can help reviewers
    understand the progression of changes.
-3. **Title and Description**: Ensure the PR title and description are clear,
-   concise, and accurately summarize the changes.  These will serve as the
-   commit message when the PR is merged, so take care to make them informative
-   and professional.
