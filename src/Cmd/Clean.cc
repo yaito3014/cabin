@@ -23,7 +23,7 @@ const Subcmd CLEAN_CMD =  //
 static int
 cleanMain(const std::span<const std::string_view> args) noexcept {
   // TODO: share across sources
-  fs::path outDir = getProjectBasePath() / "poac-out";
+  fs::path outDir = getProjectBasePath() / "cabin-out";
 
   // Parse args
   for (auto itr = args.begin(); itr != args.end(); ++itr) {
@@ -40,7 +40,7 @@ cleanMain(const std::span<const std::string_view> args) noexcept {
 
       ++itr;
       if (!(*itr == "debug" || *itr == "release")) {
-        logger::error("Invalid argument for ", *(itr - 1), ": ", *itr);
+        logger::error("Invalid argument for {}: {}", *(itr - 1), *itr);
         return EXIT_FAILURE;
       }
 

@@ -2,7 +2,7 @@
 
 Given our limited resources, we may not review PRs that fail to adhere to this document.
 
-Note that we have a [code of conduct](https://github.com/poac-dev/.github/blob/main/CODE_OF_CONDUCT.md),
+Note that we have a [code of conduct](https://github.com/cabinpkg/.github/blob/main/CODE_OF_CONDUCT.md),
 follow it in all your interactions with the project.
 
 You can ignore sections marked as "Under Construction".
@@ -60,15 +60,15 @@ standards by running the following tools:
 
 1. Run the linter (`cpplint`)
    ```bash
-   poac lint --exclude srcOld --exclude testsOld
+   cabin lint
    ```
 2. Run the formatter (`clang-format`)
    ```bash
-   poac fmt --exclude srcOld --exclude testsOld
+   cabin fmt
    ```
 3. Run the static analyzer (`clang-tidy`)
    ```bash
-   poac tidy  # or make tidy
+   cabin tidy  # or make tidy
    ```
 
 ### Testing
@@ -77,8 +77,21 @@ Always validate your changes to ensure they do not introduce regressions or
 break existing functionality:
 
 ```bash
-poac test  # or make test
+# Unit tests
+cabin test  # or make test
+
+# Integration tests
+wget https://raw.githubusercontent.com/felipec/sharness/refs/tags/v1.2.1/sharness.sh
+wget https://raw.githubusercontent.com/felipec/sharness/refs/tags/v1.2.1/lib-sharness/functions.sh
+mv sharness.sh tests/
+mkdir tests/lib-sharness
+mv functions.sh tests/lib-sharness/
+prove -j$(nproc) --shuffle tests/[0-9]*.sh
 ```
+
+Make sure to add new tests for any new functionality you introduce.  See
+<https://github.com/felipec/sharness/blob/v1.2.1/API.md> for more information on
+how to use `sharness`.
 
 ## Documentation
 

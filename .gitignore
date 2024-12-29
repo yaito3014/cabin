@@ -11,8 +11,8 @@ cmake-out/
 # Make
 build/
 
-# Poac
-poac-out/
+# Cabin
+cabin-out/
 
 # Gcov
 *.gcno

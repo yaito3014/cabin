@@ -30,10 +30,9 @@ const Subcmd FMT_CMD =
                     .setPlaceholder("<FILE>"))
         .setMainFn(fmtMain);
 
-static void
-collectFormatTargetFiles(
-    const fs::path& manifestDir, const std::vector<fs::path>& excludes,
-    std::vector<std::string>& clangFormatArgs
+static std::vector<std::string>
+collectFormatTargets(
+    const fs::path& manifestDir, const std::vector<fs::path>& excludes
 ) {
   // Read git repository if exists
   git2::Repository repo = git2::Repository();
@@ -56,13 +55,14 @@ collectFormatTargetFiles(
   };
 
   // Automatically collects format-target files
+  std::vector<std::string> sources;
   for (auto entry = fs::recursive_directory_iterator(manifestDir);
        entry != fs::recursive_directory_iterator(); ++entry) {
     if (entry->is_directory()) {
       const std::string path =
           fs::relative(entry->path(), manifestDir).string();
       if ((hasGitRepo && repo.isIgnored(path)) || isExcluded(path)) {
-        logger::debug("Ignore: ", path);
+        logger::debug("Ignore: {}", path);
         entry.disable_recursion_pending();
         continue;
       }
@@ -70,16 +70,17 @@ collectFormatTargetFiles(
       const fs::path path = fs::relative(entry->path(), manifestDir);
       if ((hasGitRepo && repo.isIgnored(path.string()))
           || isExcluded(path.string())) {
-        logger::debug("Ignore: ", path.string());
+        logger::debug("Ignore: {}", path.string());
         continue;
       }
 
       const std::string ext = path.extension().string();
       if (SOURCE_FILE_EXTS.contains(ext) || HEADER_FILE_EXTS.contains(ext)) {
-        clangFormatArgs.push_back(path.string());
+        sources.push_back(path.string());
       }
     }
   }
+  return sources;
 }
 
 static int
@@ -121,6 +122,15 @@ fmtMain(const std::span<const std::string_view> args) {
     "--fallback-style=LLVM",
     "-Werror",
   };
+
+  const fs::path projectPath = getProjectBasePath();
+  const std::vector<std::string> sources =
+      collectFormatTargets(projectPath, excludes);
+  if (sources.empty()) {
+    logger::warn("no files to format");
+    return EXIT_SUCCESS;
+  }
+
   if (isVerbose()) {
     clangFormatArgs.emplace_back("--verbose");
   }
@@ -130,16 +140,14 @@ fmtMain(const std::span<const std::string_view> args) {
     clangFormatArgs.emplace_back("-i");
     logger::info("Formatting", "{}", packageName);
   }
+  clangFormatArgs.insert(clangFormatArgs.end(), sources.begin(), sources.end());
 
-  const fs::path projectPath = getProjectBasePath();
-  collectFormatTargetFiles(projectPath, excludes, clangFormatArgs);
-
-  const char* poacFmt = std::getenv("POAC_FMT");
-  if (poacFmt == nullptr) {
-    poacFmt = "clang-format";
+  const char* cabinFmt = std::getenv("CABIN_FMT");
+  if (cabinFmt == nullptr) {
+    cabinFmt = "clang-format";
   }
 
-  const Command clangFormat = Command(poacFmt, std::move(clangFormatArgs))
+  const Command clangFormat = Command(cabinFmt, std::move(clangFormatArgs))
                                   .setWorkingDirectory(projectPath.string());
 
   return execCmd(clangFormat);

@@ -64,7 +64,7 @@ tidyMain(const std::span<const std::string_view> args) {
       if (ec == std::errc()) {
         setParallelism(numThreads);
       } else {
-        logger::error("invalid number of threads: ", *itr);
+        logger::error("invalid number of threads: {}", *itr);
         return EXIT_FAILURE;
       }
     } else {
@@ -85,12 +85,12 @@ tidyMain(const std::span<const std::string_view> args) {
   const BuildConfig config =
       emitMakefile(/*isDebug=*/true, /*includeDevDeps=*/false);
 
-  std::string tidyFlags = "POAC_TIDY_FLAGS=";
+  std::string tidyFlags = "CABIN_TIDY_FLAGS=";
   if (!isVerbose()) {
     tidyFlags += "-quiet";
   }
   if (fs::exists(".clang-tidy")) {
-    // clang-tidy will run within the poac-out/debug directory.
+    // clang-tidy will run within the cabin-out/debug directory.
     tidyFlags += " --config-file=../../.clang-tidy";
   }
   if (fix) {

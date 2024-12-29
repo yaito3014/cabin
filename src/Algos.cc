@@ -64,15 +64,15 @@ execCmd(const Command& cmd) noexcept {
 
 std::string
 getCmdOutput(const Command& cmd, const size_t retry) {
-  logger::debug("Running `{}`", cmd.toString());
+  logger::trace("Running `{}`", cmd.toString());
 
   int exitCode = EXIT_SUCCESS;
   int waitTime = 1;
   for (size_t i = 0; i < retry; ++i) {
-    const auto [curExitCode, stdout, stderr] = cmd.output();
-    static_cast<void>(stderr);
+    const auto [curExitCode, stdOut, stdErr] = cmd.output();
+    static_cast<void>(stdErr);
     if (curExitCode == EXIT_SUCCESS) {
-      return stdout;
+      return stdOut;
     }
     exitCode = curExitCode;
 
@@ -80,14 +80,14 @@ getCmdOutput(const Command& cmd, const size_t retry) {
     std::this_thread::sleep_for(std::chrono::seconds(waitTime));
     waitTime *= 2;
   }
-  throw PoacError("Command `", cmd, "` failed with exit code ", exitCode);
+  throw CabinError("Command `", cmd, "` failed with exit code ", exitCode);
 }
 
 bool
 commandExists(const std::string_view cmd) noexcept {
   const int exitCode = Command("which")
                            .addArg(cmd)
-                           .setStdoutConfig(Command::IOConfig::Null)
+                           .setStdOutConfig(Command::IOConfig::Null)
                            .spawn()
                            .wait();
   return exitCode == EXIT_SUCCESS;
@@ -177,7 +177,7 @@ findSimilarStr(
   }
 }
 
-#ifdef POAC_TEST
+#ifdef CABIN_TEST
 
 #  include "Rustify/Aliases.hpp"
 #  include "Rustify/Tests.hpp"

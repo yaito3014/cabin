@@ -213,16 +213,18 @@ Subcmd::noSuchArg(std::string_view arg) const {
                  + bold(yellow(similar.value())) + "'?\n\n";
   }
   logger::error(
-      "unexpected argument '", bold(yellow(arg)), "' found\n\n", suggestion,
-      getUsage(), "\n\n", "For more information, try '", bold(cyan("--help")),
-      '\''
+      "unexpected argument '{}' found\n\n"
+      "{}"
+      "{}\n\n"
+      "For more information, try '{}'",
+      bold(yellow(arg)), suggestion, getUsage(), bold(cyan("--help"))
   );
   return EXIT_FAILURE;
 }
 
 [[nodiscard]] int
 Subcmd::missingArgumentForOpt(const std::string_view arg) {
-  logger::error("Missing argument for `", arg, "`");
+  logger::error("Missing argument for `{}`", arg);
   return EXIT_FAILURE;
 }
 
@@ -339,8 +341,10 @@ Cli::noSuchArg(std::string_view arg) const {
                  + bold(yellow(similar.value())) + "'?\n\n";
   }
   logger::error(
-      "unexpected argument '", bold(yellow(arg)), "' found\n\n", suggestion,
-      "For a list of commands, try '", bold(cyan("poac help")), '\''
+      "unexpected argument '{}' found\n\n"
+      "{}"
+      "For a list of commands, try '{}'",
+      bold(yellow(arg)), suggestion, bold(cyan("cabin help"))
   );
   return EXIT_FAILURE;
 }
@@ -418,7 +422,7 @@ Cli::printSubcmdHelp(const std::string_view subcmd) const noexcept {
 
 size_t
 Cli::calcMaxShortSize() const noexcept {
-  // This is for printing the help message of the poac command itself.  So,
+  // This is for printing the help message of the cabin command itself.  So,
   // we don't need to consider the length of the subcommands' options.
 
   size_t maxShortSize = 0;
@@ -480,7 +484,7 @@ Cli::printAllSubcmds(const bool showHidden, size_t maxOffset) const noexcept {
 
 void
 Cli::printCmdHelp() const noexcept {
-  // Print help message for poac itself
+  // Print help message for cabin itself
   const size_t maxShortSize = calcMaxShortSize();
   const size_t maxOffset = calcMaxOffset(maxShortSize);
 
@@ -530,7 +534,7 @@ Cli::printHelp(const std::span<const std::string_view> args) const noexcept {
     }
   }
 
-  // Print help message for poac itself
+  // Print help message for cabin itself
   printCmdHelp();
   return EXIT_SUCCESS;
 }
