@@ -6,9 +6,8 @@
 
 #include <algorithm>
 #include <cctype>
-#include <memory>
+#include <cstdlib>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <string_view>
 #include <thread>
