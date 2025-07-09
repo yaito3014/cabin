@@ -1,6 +1,6 @@
 [package]
 authors = ["Ken Matsui <26405363+ken-matsui@users.noreply.github.com>"]
-description = "A package manager and build system for C++"
+description = "C++ package manager and build system"
 documentation = "https://docs.cabinpkg.com"
 edition = "20"
 homepage = "https://cabinpkg.com"
