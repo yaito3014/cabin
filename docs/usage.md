@@ -48,6 +48,22 @@ Cabin uses a cache since we executed the command with no changes.
 > export CXX=g++-13
 > ```
 
+## Generate `compile_commands.json`
+
+You can generate `compile_commands.json` with `cabin build`:
+
+```console
+you:~/hello_world$ cabin build --compdb
+   Generated cabin-out/dev/compile_commands.json
+```
+
+If you want to keep it updated as you build the project, you can update `cabin.toml`:
+
+```toml
+[profile.dev]
+comp-db = true  # always build comp DB on dev
+```
+
 ## Install dependencies
 
 Like Cargo does, Cabin installs dependencies at build time.  Cabin currently supports Git, path, and system dependencies.  You can use two ways to add dependencies to your project: using the `cabin add` command and editing `cabin.toml` directly.
