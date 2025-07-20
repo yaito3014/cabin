@@ -9,7 +9,7 @@ COMMIT_DATE ?= $(shell git show -s --date=format-local:'%Y-%m-%d' --format=%cd)
 DEBUG_FLAGS := -g -O0 -DDEBUG
 RELEASE_FLAGS := -O3 -DNDEBUG -flto
 CXXFLAGS := -std=c++$(shell grep -m1 edition cabin.toml | cut -f 2 -d'"')
-CXXFLAGS += -fdiagnostics-color 
+CXXFLAGS += -fdiagnostics-color
 CXXFLAGS += $(shell grep cxxflags cabin.toml | sed 's/cxxflags = \[//; s/\]//; s/"//g' | tr ',' ' ')
 ifeq ($(RELEASE), 1)
 	CXXFLAGS += $(RELEASE_FLAGS)
