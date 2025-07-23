@@ -108,6 +108,7 @@ Project::Project(
   );
   if (profile.lto) {
     compilerOpts.cFlags.others.emplace_back("-flto");
+    compilerOpts.ldFlags.others.emplace_back("-flto");
   }
   for (const std::string& flag : profile.cxxflags) {
     compilerOpts.cFlags.others.emplace_back(flag);
