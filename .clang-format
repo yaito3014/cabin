@@ -2,7 +2,6 @@
 BasedOnStyle: LLVM
 AlignAfterOpenBracket: BlockIndent
 AlignEscapedNewlines: Left
-AlignOperands: Align
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortEnumsOnASingleLine: false
@@ -11,7 +10,6 @@ AlwaysBreakAfterReturnType: TopLevelDefinitions
 AlwaysBreakBeforeMultilineStrings: true
 AlwaysBreakTemplateDeclarations: Yes
 BreakBeforeBinaryOperators: NonAssignment
-BreakStringLiterals: true
 Cpp11BracedListStyle: false
 IncludeBlocks: Regroup
 IndentCaseLabels: true
@@ -20,4 +18,3 @@ NamespaceIndentation: Inner
 PointerAlignment: Left
 QualifierAlignment: Left
 SpacesBeforeTrailingComments: 2
-UseTab: Never
