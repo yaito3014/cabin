@@ -81,5 +81,5 @@ Once you have all the necessary requirements in place, you can build Cabin by th
 ```bash
 git clone https://github.com/cabinpkg/cabin.git
 cd cabin
-make RELEASE=1 -j$(nproc) install
+make BUILD=release -j$(nproc) install
 ```

@@ -23,7 +23,7 @@ jobs:
         run: make versions
 
       - name: Build Cabin
-        run: make RELEASE=1 -j4
+        run: make BUILD=release -j4
 
       - name: Install Cabin
         run: |

@@ -18,7 +18,7 @@ COPY .git .
 COPY Makefile .
 COPY src ./src/
 
-RUN make RELEASE=1 install
+RUN make BUILD=release install
 
 
 FROM $base
