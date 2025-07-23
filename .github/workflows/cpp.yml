@@ -65,10 +65,6 @@ jobs:
           chmod +x ./llvm.sh
           sudo ./llvm.sh "${CXX##*-}"
 
-      - name: Setup GCC
-        if: matrix.cxx.cmd == 'g++-15'
-        run: sudo apt update && sudo apt install -y "gcc-${CXX##*-}"
-
       - name: Setup Ubuntu dependencies
         if: runner.os == 'Linux'
         uses: ./.github/actions/setup-ubuntu-deps
