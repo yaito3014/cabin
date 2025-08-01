@@ -354,8 +354,8 @@ Result<Version> VersionParser::parse() noexcept {
 
   if (!lexer.isEof()) {
     SemverParseBail(lexer, Try(lexer.peek()),
-                    " unexpected character: `"
-                        + std::string(1, lexer.s[lexer.pos]) + '`');
+                    " unexpected character: `" + std::string(1, lexer.curChar())
+                        + '`');
   }
 
   return Ok(ver);
@@ -364,7 +364,7 @@ Result<Version> VersionParser::parse() noexcept {
 // Even if the token can be parsed as an identifier, try to parse it as a
 // number.
 Result<uint64_t> VersionParser::parseNum() noexcept {
-  if (!std::isdigit(lexer.s[lexer.pos])) {
+  if (!std::isdigit(lexer.curChar())) {
     SemverParseBail(lexer, Try(lexer.peek()), " expected number");
   }
   return Ok(std::get<uint64_t>(Try(lexer.consumeNum()).value));
@@ -412,7 +412,7 @@ Result<BuildMetadata> VersionParser::parseBuild() noexcept {
 // Even if the token can be parsed as a number, try to parse it as an
 // identifier.
 Result<VersionToken> VersionParser::parseIdent() noexcept {
-  if (!std::isalnum(lexer.s[lexer.pos])) {
+  if (!std::isalnum(lexer.curChar())) {
     SemverParseBail(lexer, Try(lexer.peek()), " expected identifier");
   }
   return Ok(lexer.consumeIdent());
