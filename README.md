@@ -3,7 +3,7 @@
 > [!CAUTION]
 > Cabin is still under development and may contain a bunch of bugs.
 
-![demo](https://vhs.charm.sh/vhs-6bCfWYKEw8XYRrE4KX169w.gif)
+![demo](https://github.com/cabinpkg/cabin/releases/latest/download/demo.gif)
 
 Cabin is a package manager and build system for C++ users, inspired by Cargo for Rust.  Designed as a structure-oriented build system, Cabin minimizes the need for configurations or custom build languages, unlike CMake.  If you're tired of dealing with complex build setups, Cabin might be the perfect fit.  For now, you can refer to this repository to understand the supported project structure, as Cabin is self-buildable.
 
