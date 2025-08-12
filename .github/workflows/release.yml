@@ -1,26 +1,50 @@
-name: Auto Release
+name: Release
 
 on:
-  push:
-    tags:
-      - '*'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
+env:
+  CXX: g++-14
+
 jobs:
+  changelog:
+    runs-on: ubuntu-24.04
+    outputs:
+      skipped: ${{ steps.changelog.outputs.skipped }}
+      tag: ${{ steps.changelog.outputs.tag }}
+      clean_changelog: ${{ steps.changelog.outputs.clean_changelog }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure we have all tags
+
+      - name: Generate Conventional ChangeLog
+        uses: TriPSs/conventional-changelog-action@v6
+        id: changelog
+        with:
+          preset: "conventionalcommits"
+          tag-prefix: ""
+          output-file: "false"
+          version-file: "cabin.toml"
+          version-path: "package.version"
+          skip-git-pull: "true"
+
   build:
+    needs: changelog
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changelog.outputs.tag }}
 
       - name: Setup Ubuntu dependencies
         uses: ./.github/actions/setup-ubuntu-deps
 
       - name: Build cabin
         run: make BUILD=release -j4
-        env:
-          CXX: g++-14
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
@@ -29,10 +53,12 @@ jobs:
           path: build/cabin
 
   package:
-    needs: build
+    needs: [changelog, build]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changelog.outputs.tag }}
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -52,12 +78,12 @@ jobs:
       - name: Create DEB package
         run: nfpm pkg --packager deb
         env:
-          CABIN_VERSION: ${{ github.ref_name }}
+          CABIN_VERSION: ${{ needs.changelog.outputs.tag }}
 
       - name: Create RPM package
         run: nfpm pkg --packager rpm
         env:
-          CABIN_VERSION: ${{ github.ref_name }}
+          CABIN_VERSION: ${{ needs.changelog.outputs.tag }}
 
       - name: Upload package artifacts
         uses: actions/upload-artifact@v4
@@ -68,12 +94,12 @@ jobs:
             *.rpm
 
   demo:
-    needs: build
+    needs: [changelog, build]
     runs-on: ubuntu-24.04
-    env:
-      CXX: g++-13
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changelog.outputs.tag }}
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -143,10 +169,12 @@ jobs:
           path: ${{ runner.temp }}/demo.gif
 
   release:
-    needs: [package, demo]
+    needs: [changelog, package, demo]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.changelog.outputs.tag }}
 
       - name: Download package artifacts
         uses: actions/download-artifact@v4
@@ -161,8 +189,9 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ needs.changelog.outputs.tag }}
           draft: false
-          generate_release_notes: true
+          generate_release_notes: ${{ needs.changelog.outputs.skipped }}
           files: |
             *.deb
             *.rpm
@@ -173,13 +202,17 @@ jobs:
             ## Installation
 
             ### Ubuntu/Debian
+
             ```bash
-            wget https://github.com/cabinpkg/cabin/releases/download/${{ github.ref_name }}/cabin_${{ github.ref_name }}_amd64.deb
-            sudo dpkg -i cabin_${{ github.ref_name }}_amd64.deb
+            wget https://github.com/cabinpkg/cabin/releases/download/${{ needs.changelog.outputs.tag }}/cabin_${{ needs.changelog.outputs.tag }}_amd64.deb
+            sudo dpkg -i cabin_${{ needs.changelog.outputs.tag }}_amd64.deb
             ```
 
             ### RHEL/CentOS/Fedora
+
             ```bash
-            wget https://github.com/cabinpkg/cabin/releases/download/${{ github.ref_name }}/cabin-${{ github.ref_name }}-1.x86_64.rpm
-            sudo rpm -i cabin-${{ github.ref_name }}-1.x86_64.rpm
+            wget https://github.com/cabinpkg/cabin/releases/download/${{ needs.changelog.outputs.tag }}/cabin-${{ needs.changelog.outputs.tag }}-1.x86_64.rpm
+            sudo rpm -i cabin-${{ needs.changelog.outputs.tag }}-1.x86_64.rpm
             ```
+
+            ${{ needs.changelog.outputs.clean_changelog }}
