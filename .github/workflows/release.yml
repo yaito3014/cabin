@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  auto-release:
+  build:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +21,27 @@ jobs:
         run: make BUILD=release -j4
         env:
           CXX: g++-14
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cabin-binary
+          path: build/cabin
+
+  package:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cabin-binary
+          path: build/
+
+      - name: Make binary executable
+        run: chmod +x build/cabin
 
       - name: Install nFPM
         run: |
@@ -38,6 +59,105 @@ jobs:
         env:
           CABIN_VERSION: ${{ github.ref_name }}
 
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: |
+            *.deb
+            *.rpm
+
+  demo:
+    needs: build
+    runs-on: ubuntu-24.04
+    env:
+      CXX: g++-13
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cabin-binary
+          path: build/
+
+      - name: Make binary executable
+        run: chmod +x build/cabin
+
+      - name: Setup dependencies
+        uses: ./.github/actions/setup-ubuntu-deps
+
+      - name: Install Cabin
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          mv build/cabin "$HOME/.local/bin/"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Install ttyd
+        run: |
+          wget https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 -P "$HOME/.local/bin"
+          mv "$HOME/.local/bin/ttyd.x86_64" "$HOME/.local/bin/ttyd"
+          chmod +x "$HOME/.local/bin/ttyd"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+
+      - name: Install VHS
+        run: go install github.com/charmbracelet/vhs@latest
+
+      - name: Install Nerd Font
+        run: |
+          mkdir -p ~/.local/share/fonts
+          wget https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/FiraCode.zip
+          unzip FiraCode.zip -d ~/.local/share/fonts/
+          fc-cache -fv
+
+      - name: Install Zsh
+        run: sudo apt update && sudo apt install -y zsh
+
+      - name: Install zsh-syntax-highlighting
+        run: |
+          git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/z
+          echo 'source ~/z/zsh-syntax-highlighting.zsh' >> ~/.zshrc
+
+      - name: Install Starship
+        run: |
+          curl -sS https://starship.rs/install.sh | sh -s -- -y
+          echo 'eval "$(starship init zsh)"' >> ~/.zshrc
+
+      - name: Move demo.tape
+        run: mv demo.tape ${{ runner.temp }}
+
+      - name: Generate demo.gif
+        run: vhs demo.tape
+        working-directory: ${{ runner.temp }}
+
+      - name: Upload demo artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-gif
+          path: ${{ runner.temp }}/demo.gif
+
+  release:
+    needs: [package, demo]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download package artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: packages
+
+      - name: Download demo artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: demo-gif
+
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
@@ -46,6 +166,7 @@ jobs:
           files: |
             *.deb
             *.rpm
+            demo.gif
           body: |
             :sparkling_heart: I maintain **Cabin** in my spare time. Buy me a coffee on [GitHub Sponsors](https://github.com/sponsors/ken-matsui) so I can keep shipping features!
 
