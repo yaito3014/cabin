@@ -21,12 +21,6 @@ jobs:
         build: [dev, release]
         coverage: [false]
         cxx:
-          - name: "Linux - Clang 16"
-            cmd: clang++-16
-            os: ubuntu-24.04
-          - name: "Linux - Clang 17"
-            cmd: clang++-17
-            os: ubuntu-24.04
           - name: "Linux - Clang 18"
             cmd: clang++-18
             os: ubuntu-24.04
