@@ -179,7 +179,7 @@ Result<Compiler> Compiler::init() noexcept {
     }
   }
 
-  return { Err(anyhow::anyhow("failed to locate a C++ compiler, set $CXX")) };
+  return Err(anyhow::anyhow("failed to locate a C++ compiler, set $CXX"));
 }
 
 Command Compiler::makeCompileCmd(const CompilerOpts& opts,
