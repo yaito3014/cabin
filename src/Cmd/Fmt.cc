@@ -61,10 +61,10 @@ collectFormatTargets(const fs::path& manifestDir,
   }
 
   const auto isExcluded = [&](std::string_view path) -> bool {
-    return std::ranges::find_if(
-               excludes,
-               [&](const fs::path& path2) {
-                 return fs::relative(path2, manifestDir).string() == path;
+    return std::ranges::find(
+               excludes, path,
+               [&](const fs::path& candidate) {
+                 return fs::relative(candidate, manifestDir).string();
                })
            != excludes.end();
   };

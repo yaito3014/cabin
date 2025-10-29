@@ -81,8 +81,10 @@ Result<void> buildImpl(const Manifest& manifest, std::string& outDir,
     const Profile& profile = manifest.profiles.at(buildProfile);
     Diag::info("Finished", "`{}` profile [{}] target(s) in {:.2f}s",
                buildProfile, profile, elapsed.count());
+    return Ok();
+  } else {
+    return Err(anyhow::anyhow("build failed"));
   }
-  return Ok();
 }
 
 static Result<void> buildMain(const CliArgsView args) {
@@ -97,11 +99,11 @@ static Result<void> buildMain(const CliArgsView args) {
       return Ok();
     } else if (control == Cli::Continue) {
       continue;
-    } else if (arg == "-r" || arg == "--release") {
+    } else if (matchesAny(arg, { "-r", "--release" })) {
       buildProfile = BuildProfile::Release;
     } else if (arg == "--compdb") {
       buildCompdb = true;
-    } else if (arg == "-j" || arg == "--jobs") {
+    } else if (matchesAny(arg, { "-j", "--jobs" })) {
       if (itr + 1 == args.end()) {
         return Subcmd::missingOptArgumentFor(arg);
       }
