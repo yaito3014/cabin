@@ -11,7 +11,7 @@ You will require the following compilers, commands, and libraries:
 * Clang: `19` or later
 * Apple Clang: provided by `macOS Sonoma (14)` or later
 
-(generally, the latest 3 versions are supported to build Cabin.)
+(generally, the latest 3 versions are supported to build/test Cabin.)
 
 ## Commands
 
