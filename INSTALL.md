@@ -5,7 +5,7 @@
 
 You will require the following compilers, commands, and libraries:
 
-## Compilers (that support C++2b)
+## Compilers (that support C++23)
 
 * GCC: `13` or later
 * Clang: `19` or later
