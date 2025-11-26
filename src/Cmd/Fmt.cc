@@ -16,6 +16,7 @@
 #include <spdlog/spdlog.h>
 #include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -76,6 +77,12 @@ collectFormatTargets(const fs::path& manifestDir,
     if (entry->is_directory()) {
       const std::string path =
           fs::relative(entry->path(), manifestDir).string();
+      if (entry->path() != manifestDir
+          && fs::exists(entry->path() / Manifest::FILE_NAME)) {
+        spdlog::debug("Ignore nested project: {}", path);
+        entry.disable_recursion_pending();
+        continue;
+      }
       if ((hasGitRepo && repo.isIgnored(path)) || isExcluded(path)) {
         spdlog::debug("Ignore: {}", path);
         entry.disable_recursion_pending();
