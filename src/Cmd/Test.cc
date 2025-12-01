@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <utility>
 
 namespace cabin {
 
@@ -26,10 +27,13 @@ const Subcmd TEST_CMD = //
         .setDesc("Run the tests of a local package")
         .addOpt(OPT_JOBS)
         .addOpt(Opt{ "--coverage" }.setDesc("Enable code coverage analysis"))
+        .setArg(
+            Arg{ "TESTNAME" }.setRequired(false).setDesc("Test name to launch"))
         .setMainFn(testMain);
 
 static rs::Result<void> testMain(const CliArgsView args) {
   bool enableCoverage = false;
+  std::optional<std::string> testName;
 
   for (auto itr = args.begin(); itr != args.end(); ++itr) {
     const std::string_view arg = *itr;
@@ -54,6 +58,8 @@ static rs::Result<void> testMain(const CliArgsView args) {
       setParallelism(numThreads);
     } else if (arg == "--coverage") {
       enableCoverage = true;
+    } else if (!testName) {
+      testName = arg;
     } else {
       return TEST_CMD.noSuchArg(arg);
     }
@@ -63,7 +69,7 @@ static rs::Result<void> testMain(const CliArgsView args) {
   Builder builder(manifest.path.parent_path(), BuildProfile::Test);
   rs_try(builder.schedule(ScheduleOptions{ .includeDevDeps = true,
                                            .enableCoverage = enableCoverage }));
-  return builder.test();
+  return builder.test(std::move(testName));
 }
 
 } // namespace cabin

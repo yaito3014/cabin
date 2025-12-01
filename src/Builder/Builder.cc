@@ -75,7 +75,7 @@ rs::Result<void> Builder::build() {
   return rs::Ok();
 }
 
-rs::Result<void> Builder::test() {
+rs::Result<void> Builder::test(std::optional<std::string> testName) {
   rs_try(ensurePlanned());
 
   const Manifest& mf = graphState->manifest();
@@ -116,6 +116,7 @@ rs::Result<void> Builder::test() {
 
   std::size_t numPassed = 0;
   std::size_t numFailed = 0;
+  std::size_t numFilteredOut = 0;
   ExitStatus summaryStatus(EXIT_SUCCESS);
 
   const auto labelFor = [](BuildGraph::TestKind kind) {
@@ -128,12 +129,18 @@ rs::Result<void> Builder::test() {
     std::unreachable();
   };
 
-  for (const auto& target : targets) {
-    const fs::path absoluteBinary = outDir / target.ninjaTarget;
+  for (const auto& testTarget : targets) {
+    if (testName.has_value()
+        && !testTarget.ninjaTarget.contains(testName.value())) {
+      ++numFilteredOut;
+      continue;
+    }
+
+    const fs::path absoluteBinary = outDir / testTarget.ninjaTarget;
     const std::string testBinPath =
         fs::relative(absoluteBinary, mf.path.parent_path()).string();
-    Diag::info("Running", "{} test {} ({})", labelFor(target.kind),
-               target.sourcePath, testBinPath);
+    Diag::info("Running", "{} test {} ({})", labelFor(testTarget.kind),
+               testTarget.sourcePath, testBinPath);
 
     const ExitStatus curExitStatus =
         rs_try(execCmd(Command(absoluteBinary.string())));
@@ -149,8 +156,8 @@ rs::Result<void> Builder::test() {
   const std::chrono::duration<double> runElapsed = runEnd - runStart;
 
   const std::string summary =
-      fmt::format("{} passed; {} failed; finished in {:.2f}s", numPassed,
-                  numFailed, runElapsed.count());
+      fmt::format("{} passed; {} failed; {} filtered out; finished in {:.2f}s",
+                  numPassed, numFailed, numFilteredOut, runElapsed.count());
   if (!summaryStatus.success()) {
     return rs::Err(rs::anyhow(summary));
   }
